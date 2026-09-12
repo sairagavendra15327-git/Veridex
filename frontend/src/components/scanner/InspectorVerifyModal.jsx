@@ -1,12 +1,10 @@
 import { useState } from 'react'
 
 function InspectorVerifyModal({ result, onClose, onSaveVerification }) {
-  const [inspectorName, setInspectorName] = useState('Rajesh Sharma')
-  const [badgeId, setBadgeId] = useState('LM-DEL-8924')
+  const [inspectorName, setInspectorName] = useState('')
+  const [badgeId, setBadgeId] = useState('')
   const [decision, setDecision] = useState('NOTICE') // 'APPROVE' | 'NOTICE' | 'SEIZE'
-  const [remarks, setRemarks] = useState(
-    'Unit Sale Price (USP) font height fails minimum 1.5mm threshold under Rule 9 Table I. Notice under Section 39 recommended for physical measuring gauge confirmation.'
-  )
+  const [remarks, setRemarks] = useState('')
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -38,7 +36,7 @@ function InspectorVerifyModal({ result, onClose, onSaveVerification }) {
                 </svg>
               </span>
               <h2 id="verify-modal-title" className="text-base font-semibold text-white">
-                Statutory Inspector Sign-Off & Verification
+                Inspector Verification
               </h2>
             </div>
             <button
@@ -51,7 +49,7 @@ function InspectorVerifyModal({ result, onClose, onSaveVerification }) {
             </button>
           </div>
           <p className="mt-1 text-xs text-slate-400">
-            Legal Metrology Act, 2009 · Section 15 Enforcement Procedure
+            Review of the preliminary compliance screening result. This record captures the authorized inspector's decision-support review.
           </p>
         </div>
 
@@ -65,9 +63,9 @@ function InspectorVerifyModal({ result, onClose, onSaveVerification }) {
               <input
                 id="inspector-name-input"
                 type="text"
-                required
                 value={inspectorName}
                 onChange={(e) => setInspectorName(e.target.value)}
+                placeholder="Enter officer name"
                 className="mt-1 w-full rounded-lg border border-veridex-border bg-veridex-bg px-3 py-2 text-xs text-white focus:border-veridex-accent focus:outline-none"
               />
             </div>
@@ -78,9 +76,9 @@ function InspectorVerifyModal({ result, onClose, onSaveVerification }) {
               <input
                 id="badge-id-input"
                 type="text"
-                required
                 value={badgeId}
                 onChange={(e) => setBadgeId(e.target.value)}
+                placeholder="Enter badge or jurisdiction ID"
                 className="mt-1 w-full rounded-lg border border-veridex-border bg-veridex-bg px-3 py-2 text-xs text-white focus:border-veridex-accent focus:outline-none"
               />
             </div>
@@ -88,7 +86,7 @@ function InspectorVerifyModal({ result, onClose, onSaveVerification }) {
 
           <div>
             <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Official Statutory Decision
+              Inspector Decision
             </label>
             <div className="space-y-2">
               <label
@@ -198,7 +196,7 @@ function InspectorVerifyModal({ result, onClose, onSaveVerification }) {
               type="submit"
               className="rounded-lg bg-veridex-accent px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-veridex-accent-soft"
             >
-              Confirm Statutory Determination
+              Record Inspector Decision
             </button>
           </div>
         </form>

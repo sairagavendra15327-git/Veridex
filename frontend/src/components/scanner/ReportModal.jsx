@@ -17,10 +17,10 @@ function ReportModal({ result, verification, onClose }) {
         <div className="flex items-center justify-between border-b border-veridex-border p-4 sm:p-5">
           <div>
             <span className="text-[11px] font-mono uppercase tracking-wider text-veridex-accent-soft">
-              Official Regulatory Document
+              Decision-Support Report
             </span>
             <h2 id="report-modal-title" className="text-base font-semibold text-white">
-              Legal Metrology Compliance Screening Report
+              Preliminary Compliance Screening Report
             </h2>
           </div>
 
@@ -58,27 +58,35 @@ function ReportModal({ result, verification, onClose }) {
               DIRECTORATE OF LEGAL METROLOGY (PACKAGED COMMODITIES DIVISION)
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              Preliminary Statutory Inspection Summary · Under PCR, 2011 & Legal Metrology Act, 2009
+              Preliminary Screening Summary · Decision-support system for inspector review
             </p>
           </div>
 
-          {/* Metadata Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-veridex-bg p-3.5 rounded-lg border border-veridex-border">
+          {/* Metadata Grid — 6 cells: ID, timestamp, verdict, score, OCR confidence, rule version */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-veridex-bg p-3.5 rounded-lg border border-veridex-border">
             <div>
               <span className="text-slate-500 block">Report / Inspection ID</span>
               <span className="font-mono text-white font-semibold">{result.inspectionId}</span>
             </div>
             <div>
-              <span className="text-slate-500 block">Date & Time</span>
+              <span className="text-slate-500 block">Date &amp; Time</span>
               <span className="text-white font-mono">{new Date(result.timestamp).toLocaleString()}</span>
             </div>
             <div>
-              <span className="text-slate-500 block">System Verdict</span>
+              <span className="text-slate-500 block">Preliminary Status</span>
               <span className="text-amber-400 font-semibold">{result.overallStatus}</span>
             </div>
             <div>
-              <span className="text-slate-500 block">Compliance Score</span>
+              <span className="text-slate-500 block">Checks Passed</span>
               <span className="text-white font-mono font-semibold">{result.overallScore}%</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block">OCR Confidence</span>
+              <span className="text-white font-mono">{result.confidenceMetrics?.ocrExtraction ?? '—'}%</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block">Rule Version</span>
+              <span className="font-mono text-slate-300 text-[10px]">{result.ruleVersion || 'LM-PCR-2011'}</span>
             </div>
           </div>
 
@@ -97,7 +105,7 @@ function ReportModal({ result, verification, onClose }) {
           {/* Compliance Findings Summary */}
           <div className="space-y-2 text-xs">
             <h4 className="font-semibold uppercase tracking-wider text-slate-400 text-[11px]">
-              Mandatory Declarations Assessment
+              SYSTEM SCREENING · Mandatory Declarations Assessment
             </h4>
             <table className="w-full text-left border-collapse border border-veridex-border rounded overflow-hidden">
               <thead className="bg-veridex-bg text-slate-400 font-medium">
@@ -133,10 +141,10 @@ function ReportModal({ result, verification, onClose }) {
           <div className="rounded-lg border border-veridex-border bg-veridex-bg p-4 space-y-2 text-xs">
             <div className="flex items-center justify-between border-b border-veridex-border pb-2">
               <span className="font-semibold text-white uppercase tracking-wider text-[11px]">
-                Authorized Inspector Attestation
+                INSPECTOR DECISION
               </span>
               <span className="font-mono text-[10px] text-veridex-accent-soft">
-                Section 15, Legal Metrology Act, 2009
+                captured by authorized inspector
               </span>
             </div>
             {verification ? (
@@ -148,26 +156,27 @@ function ReportModal({ result, verification, onClose }) {
                   <p><span className="text-slate-500">Verified Timestamp:</span> <span className="font-mono text-slate-300">{new Date(verification.verifiedAt).toLocaleString()}</span></p>
                 </div>
                 <p className="text-slate-300 text-[11px] pt-1">
-                  <span className="text-slate-500 font-medium">Remarks:</span> {verification.remarks}
+                  <span className="text-slate-500 font-medium">Remarks:</span> {verification.remarks || '—'}
                 </p>
               </div>
             ) : (
               <div className="py-2 text-center text-slate-500 italic text-[11px]">
-                Awaiting officer formal sign-off (Use &quot;Verify Result&quot; action in scanner).
+                Awaiting inspector verification (Use the Verify Result action in the scanner).
               </div>
             )}
           </div>
 
           {/* Statutory Disclaimer Notice */}
           <div className="border-t border-veridex-border pt-3 text-[10px] text-slate-500 leading-relaxed text-center">
-            {result.statutoryNotice.text}
+            {result.statutoryNotice?.text ||
+              'VERIDEX provides preliminary decision support based on image extraction and codified checks. The authorized Legal Metrology Inspector makes the final determination.'}
           </div>
         </div>
 
         {/* Footer */}
         <div className="border-t border-veridex-border p-4 flex justify-between items-center bg-veridex-bg/50">
           <p className="text-[11px] text-slate-500">
-            VERIDEX SIH26034 · Legal Metrology Intelligence Platform
+            VERIDEX SIH26034 · Legal Metrology Intelligence Platform · Preliminary Screening Only
           </p>
           <button
             type="button"

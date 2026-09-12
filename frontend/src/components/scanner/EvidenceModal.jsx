@@ -1,9 +1,18 @@
 import { useState } from 'react'
 
 function EvidenceModal({ result, onClose }) {
-  const [activeTab, setActiveTab] = useState('snippets') // 'snippets' | 'raw' | 'rules'
+  const [activeTab, setActiveTab] = useState('snippets') // 'snippets' | 'raw' | 'words' | 'rules'
 
   if (!result) return null
+
+  const ocrWords = result.ocrWords || []
+
+  const tabs = [
+    { id: 'snippets', label: `Extracted Evidence Snippets (${result.evidenceSnippets?.length || 0})` },
+    { id: 'raw',      label: 'Raw OCR Stream Transcript' },
+    { id: 'words',    label: `Word-Level OCR Data (${ocrWords.length} words)` },
+    { id: 'rules',    label: 'Statutory Rule Matrix (PCR 2011)' },
+  ]
 
   return (
     <div
@@ -21,7 +30,7 @@ function EvidenceModal({ result, onClose }) {
                 AUDIT TRAIL
               </span>
               <h2 id="evidence-modal-title" className="text-lg font-semibold text-white">
-                Comprehensive Extraction & Legal Evidence
+                Comprehensive Extraction &amp; Legal Evidence
               </h2>
             </div>
             <p className="mt-1 text-xs text-slate-400">
@@ -42,44 +51,27 @@ function EvidenceModal({ result, onClose }) {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-veridex-border px-5 gap-4">
-          <button
-            type="button"
-            onClick={() => setActiveTab('snippets')}
-            className={`py-3 text-xs font-semibold border-b-2 transition-colors ${
-              activeTab === 'snippets'
-                ? 'border-veridex-accent text-veridex-accent-soft'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Extracted Evidence Snippets ({result.evidenceSnippets?.length || 0})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('raw')}
-            className={`py-3 text-xs font-semibold border-b-2 transition-colors ${
-              activeTab === 'raw'
-                ? 'border-veridex-accent text-veridex-accent-soft'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Raw OCR Stream Transcript
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('rules')}
-            className={`py-3 text-xs font-semibold border-b-2 transition-colors ${
-              activeTab === 'rules'
-                ? 'border-veridex-accent text-veridex-accent-soft'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Statutory Rule Matrix (PCR 2011)
-          </button>
+        <div className="flex border-b border-veridex-border px-5 gap-4 overflow-x-auto">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`py-3 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
+                activeTab === tab.id
+                  ? 'border-veridex-accent text-veridex-accent-soft'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
+
+          {/* TAB: Extracted Evidence Snippets */}
           {activeTab === 'snippets' && (
             <div className="space-y-3">
               <p className="text-xs text-slate-400">
@@ -123,17 +115,82 @@ function EvidenceModal({ result, onClose }) {
             </div>
           )}
 
+          {/* TAB: Raw OCR Stream */}
           {activeTab === 'raw' && (
             <div className="space-y-3">
               <p className="text-xs text-slate-400">
-                Direct character stream output from the optical character recognition pipeline before entity classification:
+                Direct character stream output from the Tesseract OCR pipeline before entity classification:
               </p>
-              <pre className="rounded-lg border border-veridex-border bg-slate-950 p-4 font-mono text-xs text-slate-300 leading-relaxed overflow-x-auto whitespace-pre-wrap">
-                {result.rawOcrTranscript}
-              </pre>
+              {result.rawOcrTranscript && result.rawOcrTranscript !== 'No OCR text detected.' ? (
+                <pre className="rounded-lg border border-veridex-border bg-slate-950 p-4 font-mono text-xs text-slate-300 leading-relaxed overflow-x-auto whitespace-pre-wrap">
+                  {result.rawOcrTranscript}
+                </pre>
+              ) : (
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-300">
+                  No readable OCR text was extracted from this image.
+                </div>
+              )}
+              {result.ocrCharacterCount > 0 && (
+                <p className="text-[11px] font-mono text-slate-500">
+                  Character count: {result.ocrCharacterCount} · OCR confidence: {result.confidenceMetrics?.ocrExtraction}%
+                </p>
+              )}
             </div>
           )}
 
+          {/* TAB: Word-Level OCR Bounding Box Data */}
+          {activeTab === 'words' && (
+            <div className="space-y-3">
+              <p className="text-xs text-slate-400">
+                Word-level bounding-box data returned by Tesseract 5 (real extraction, coordinates in pixels of the pre-processed image):
+              </p>
+              {ocrWords.length === 0 ? (
+                <div className="rounded-lg border border-veridex-border bg-veridex-bg p-4 text-xs text-slate-400 italic">
+                  No word-level OCR data available for this scan.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-[11px]">
+                    <thead className="bg-veridex-bg text-slate-400">
+                      <tr>
+                        <th className="p-2 border border-veridex-border font-medium">#</th>
+                        <th className="p-2 border border-veridex-border font-medium">Word</th>
+                        <th className="p-2 border border-veridex-border font-medium">Confidence</th>
+                        <th className="p-2 border border-veridex-border font-medium">X</th>
+                        <th className="p-2 border border-veridex-border font-medium">Y</th>
+                        <th className="p-2 border border-veridex-border font-medium">Width</th>
+                        <th className="p-2 border border-veridex-border font-medium">Height</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ocrWords.map((w, i) => {
+                        const conf = w.confidence ?? 0
+                        let confColor = 'text-emerald-400'
+                        if (conf < 80) confColor = 'text-amber-400'
+                        if (conf < 50) confColor = 'text-red-400'
+                        return (
+                          <tr key={i} className={i % 2 === 0 ? 'bg-veridex-bg/40' : ''}>
+                            <td className="p-2 border border-veridex-border font-mono text-slate-500">{i + 1}</td>
+                            <td className="p-2 border border-veridex-border font-mono text-slate-200 font-semibold">{w.text}</td>
+                            <td className={`p-2 border border-veridex-border font-mono font-semibold ${confColor}`}>{conf}%</td>
+                            <td className="p-2 border border-veridex-border font-mono text-slate-400">{w.box?.x ?? '—'}</td>
+                            <td className="p-2 border border-veridex-border font-mono text-slate-400">{w.box?.y ?? '—'}</td>
+                            <td className="p-2 border border-veridex-border font-mono text-slate-400">{w.box?.width ?? '—'}</td>
+                            <td className="p-2 border border-veridex-border font-mono text-slate-400">{w.box?.height ?? '—'}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                  <p className="mt-2 text-[10px] text-slate-500 font-mono">
+                    Source: pytesseract.image_to_data() · Filtered at confidence ≥ 20 · Coordinates in pixels of the upscaled pre-processed image
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB: Statutory Rule Matrix */}
           {activeTab === 'rules' && (
             <div className="space-y-3">
               <p className="text-xs text-slate-400">
@@ -145,7 +202,7 @@ function EvidenceModal({ result, onClose }) {
                   <p className="text-slate-400">Requires name and complete postal address of the manufacturer, packer, or importer.</p>
                 </div>
                 <div className="rounded-lg border border-veridex-border bg-veridex-bg p-3 text-xs space-y-1">
-                  <p className="font-semibold text-white">Rule 6(1)(b) & Rule 12 · Net Quantity</p>
+                  <p className="font-semibold text-white">Rule 6(1)(b) &amp; Rule 12 · Net Quantity</p>
                   <p className="text-slate-400">Requires declaration in standard SI units (g, kg, ml, L) without misleading prefixes.</p>
                 </div>
                 <div className="rounded-lg border border-veridex-border bg-veridex-bg p-3 text-xs space-y-1">
@@ -160,13 +217,31 @@ function EvidenceModal({ result, onClose }) {
                   <p className="font-semibold text-white">Rule 6(1)(g) · Consumer Grievance Details</p>
                   <p className="text-slate-400">Requires name, address, telephone number, and email address of grievance officer.</p>
                 </div>
+                <div className="rounded-lg border border-veridex-border bg-veridex-bg p-3 text-xs space-y-1">
+                  <p className="font-semibold text-white">Rule 6(1)(d) · Manufacture / Packing Date</p>
+                  <p className="text-slate-400">Requires month and year of manufacture or packing in numeric or abbreviated format.</p>
+                </div>
+                <div className="rounded-lg border border-veridex-border bg-veridex-bg p-3 text-xs space-y-1">
+                  <p className="font-semibold text-slate-300">Rule 6(10) · Country of Origin (conditional)</p>
+                  <p className="text-slate-400">Required if relevant to consumer purchasing decision. Applicability reviewed per product category.</p>
+                </div>
+              </div>
+              <div className="mt-3 rounded-lg border border-veridex-border bg-veridex-bg p-3 text-[10px] text-slate-500 leading-relaxed">
+                <span className="font-semibold text-slate-400">Rule Version: </span>
+                <span className="font-mono">{result.ruleVersion || 'LM-PCR-2011'}</span>
+                {' · '}
+                VERIDEX performs preliminary text-based detection only. Physical measurement of quantities, font heights, and label conspicuity remains the statutory responsibility of the authorized Legal Metrology Inspector.
               </div>
             </div>
           )}
+
         </div>
 
         {/* Modal Footer */}
-        <div className="border-t border-veridex-border p-4 flex justify-end">
+        <div className="border-t border-veridex-border p-4 flex justify-between items-center">
+          <p className="text-[10px] font-mono text-slate-500">
+            Source: Tesseract OCR 5 + Deterministic Rule Engine · Preliminary screening only
+          </p>
           <button
             type="button"
             onClick={onClose}

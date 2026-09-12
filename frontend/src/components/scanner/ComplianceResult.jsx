@@ -46,7 +46,15 @@ function ComplianceResult({
             ) : null}
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <StatusBadge status="REVIEW" />
+                <StatusBadge
+                  status={
+                    result.overallStatus === 'COMPLIANT'
+                      ? 'PASS'
+                      : result.overallStatus === 'NON-COMPLIANT'
+                      ? 'FAIL'
+                      : 'REVIEW'
+                  }
+                />
                 <span className="rounded-md border border-veridex-border bg-veridex-bg px-2.5 py-0.5 font-mono text-xs text-slate-300">
                   {result.inspectionId}
                 </span>
@@ -98,7 +106,7 @@ function ComplianceResult({
               </span>
               <div>
                 <p className="font-semibold text-emerald-300">
-                  Officer Verified: {verification.decision}
+                  Inspector Verification: {verification.decision}
                 </p>
                 <p className="text-[11px] text-slate-300">
                   By Inspector {verification.inspectorName} ({verification.badgeId}) · {verification.remarks}
@@ -106,7 +114,7 @@ function ComplianceResult({
               </div>
             </div>
             <span className="font-mono text-[10px] text-emerald-400 bg-emerald-950/80 px-2 py-1 rounded border border-emerald-500/30 shrink-0">
-              Statutory Sign-Off Recorded
+              Inspector Verification Recorded
             </span>
           </div>
         )}
@@ -115,14 +123,16 @@ function ComplianceResult({
       {/* Summary Stats Row */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-veridex-border bg-veridex-surface p-4">
-          <p className="text-xs text-slate-400">Statutory Score</p>
+          <p className="text-xs text-slate-400">Checks Passed</p>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-2xl font-bold font-mono text-amber-400">
               {result.overallScore}%
             </span>
-            <span className="text-[10px] uppercase font-mono text-slate-500">Threshold: 85%</span>
+            <span className="text-[10px] uppercase font-mono text-slate-500">Preliminary Screening</span>
           </div>
-          <p className="mt-1 text-[11px] text-slate-400">Overall Rule Compliance</p>
+          <p className="mt-1 text-[11px] text-slate-400">
+  Preliminary rule-check coverage
+</p>
         </div>
 
         <div className="rounded-xl border border-veridex-border bg-veridex-surface p-4">
@@ -133,7 +143,9 @@ function ComplianceResult({
             </span>
             <span className="text-[11px] text-slate-500">of {result.summary.totalChecked} checked</span>
           </div>
-          <p className="mt-1 text-[11px] text-emerald-400/90">Rule 6(1) standards satisfied</p>
+          <p className="mt-1 text-[11px] text-emerald-400/90">
+  Preliminary checks passed
+</p>
         </div>
 
         <div className="rounded-xl border border-veridex-border bg-veridex-surface p-4">
@@ -144,18 +156,29 @@ function ComplianceResult({
             </span>
             <span className="text-[11px] text-slate-500">items</span>
           </div>
-          <p className="mt-1 text-[11px] text-amber-400/90">Unit Sale Price & Origin</p>
+          <p className="mt-1 text-[11px] text-amber-400/90">
+  {result.flaggedDeclarations.length > 0
+    ? result.flaggedDeclarations
+        .slice(0, 2)
+        .map((item) => item.name)
+        .join(' & ')
+    : 'No items flagged'}
+</p>
         </div>
 
         <div className="rounded-xl border border-veridex-border bg-veridex-surface p-4">
-          <p className="text-xs text-slate-400">Overall AI Confidence</p>
+          <p className="text-xs text-slate-400">OCR Confidence</p>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-2xl font-bold font-mono text-slate-200">
               {result.confidenceMetrics.overall}%
             </span>
-            <span className="text-[10px] font-mono text-slate-500">Multimodal</span>
+            <span className="text-[10px] font-mono text-slate-500">
+  Tesseract
+</span>
           </div>
-          <p className="mt-1 text-[11px] text-slate-400">High character clarity</p>
+          <p className="mt-1 text-[11px] text-slate-400">
+  OCR extraction confidence
+</p>
         </div>
       </div>
 

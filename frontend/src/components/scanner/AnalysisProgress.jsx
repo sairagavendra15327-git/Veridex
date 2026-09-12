@@ -20,7 +20,7 @@ function AnalysisProgress({ currentStage, previewUrl }) {
             Analyzing Package Commodity Declarations
           </h2>
           <p className="mt-1 text-xs text-slate-400">
-            Frontend Simulation · PCR 2011 Rule Verification (No live API connected)
+            Tesseract OCR · PCR 2011 Rule Engine · Real-time backend analysis
           </p>
         </div>
 
